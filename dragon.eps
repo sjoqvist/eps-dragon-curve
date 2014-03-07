@@ -1,0 +1,23 @@
+%!PS-Adobe-2.0 EPSF-2.0
+%%BoundingBox: -171 -85 341 341
+%%Title: Dragon Curve by Anders Sjoqvist
+%%CreationDate: 1/3/09
+%%EndComments
+/defaults save def
+newpath
+.2 setlinewidth
+0 0 moveto
+1 0 1 0
+1 0 rlineto
+1 1 32767 {
+    {dup 2 mod 1 eq {exit} if 2 idiv} loop
+    2 idiv
+    2 mod 1 eq {neg exch} {exch neg} ifelse
+    /dy exch def /dx exch def
+    2 copy 2 copy exch dx add exch dy add
+    rcurveto
+    dx dy dx dy
+} for
+dx dy rlineto
+stroke
+defaults restore

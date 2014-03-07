@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Copyright (c) 2014 Anders Sjöqvist
+# This projected is licensed under the terms of the MIT license.
+#
+# Script to help finding an optimal preview image of the dragon curve. It will
+# modify the bounding box of the EPS to reduce the time and memory consumption
+# necessary for calculating the magnified cutout. The magnification zoom
+# multiplied with the anti-aliasing zoom would otherwise require a
+# temporary 20480x17040 picture when run in the original setup.
+#
+# The script assumes that the cutout should be placed in the lower right
+# corner, with lines that might have to be adjusted if the changes are too
+# great. Beyond that, most variables can be altered with an okay result.
+
+# try adjusting these variables:
+x=80    # top left x coordinate for the cutout detail (in original image)
+y=308   # top left y coordinate
+dx=22   # width of cutout
+dy=22   # height of cutout
+z=10    # zoom factor
+aaz=4   # anti-aliasing zoom (100/aaz needs to be an integer)
+mx=8    # horizontal margin from right edge for placement of magnified cutout
+my=8    # vertical margin from bottom edge for cutout
+sw=2    # stroke width
+c=blue  # stroke color
+
+# read the size of the EPS bounding box (i.e. the size of the resulting PNG)
+read eps_x1 eps_y1 eps_x2 eps_y2 <<EOF
+$(sed -n "s/^%%BoundingBox: \(.*\)$/\1/p" dragon.eps)
+EOF
+
+w=$((eps_x2-eps_x1))  # resulting PNG width
+h=$((eps_y2-eps_y1))  # resulting PNG height
+# bounding box for the magnified cutout
+newbox="$((eps_x1+x)) $((eps_y2-y-dy)) $((eps_x1+x+dx)) $((eps_y2-y))"
+
+# run command
+sed "s/^\(%%BoundingBox: \).*\$/\1$newbox/" dragon.eps \
+	| convert -density $((72*aaz)) dragon.eps -alpha off \
+	-resize $((100/aaz))% -fill none -stroke $c -strokewidth $sw \
+	-draw "rectangle $x,$y $((x+dx)),$((y+dy))" \
+	-draw "line $((x+dx)),$y $((w-dx*z-mx)),$((h-dy*z-my))" \
+	-draw "line $((x+dx)),$((y+dy)) $((w-dx*z-mx)),$((h-my))" \
+	\( -density $((72*z*aaz)) - -alpha off \
+	-resize $((100/aaz))% \
+	-geometry +$((w-dx*z-mx))+$((h-dy*z-my)) \) \
+	-composite \
+	-draw "rectangle $((w-dx*z-mx)),$((h-dy*z-my)) $((w-mx)),$((h-my))" \
+	-depth 8 -strip preview.png
