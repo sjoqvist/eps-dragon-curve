@@ -11,7 +11,7 @@ code through a test, I sent the raw EPS file to a PS 3 emulating laser
 printer, and it printed the curve correctly without complaining.
 
 ![Dragon curve preview with magnified
-cutout](https://raw.github.com/aliquis/eps-dragon-curve/master/preview.png)
+cutout](https://raw.github.com/sjoqvist/eps-dragon-curve/master/preview.png)
 
 To generate this preview PNG, execute
 
